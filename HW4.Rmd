@@ -1,0 +1,206 @@
+---
+title: "Homework4:STATGR5702(Exploratory Data and Visualizations)"
+author: "Lakshya Garg(Uni-lg2906) | Jonathan Galsurkar(jfg2150)"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+### *Question1. [10 points] Write a DRAFT introduction. (It will likely change by the time you submit the final project.) From the final project assignment: "In this section, explain why you chose this topic, and the questions you are interested in studying. Include a brief description of how you found the data, and clear instructions on where the reader can find the data."*
+
+### New York City Restaurant Inspection Results
+
+In one of the greatest cities in the world, NYC, we have an abundant amount of options to choose from when it comes to where we eat, whether we are looking for fine dining, fast food, or something in between. The cuisine choices seem just as endless. Is there a good way to help choose a restaurant to eat in or a general location? Although not an easy task, one thing we can all agree on is that nobody wants to eat in a restaurant ridden with health violations. In our project, we will explore and analyze NYC’s restaurant inspection results from 2013-2017 of the five boroughs.
+
+We are interested in answering:
+
+1.	Which cuisines have the least and most violations along with their associated score.
+
+2.	What parts of NYC have the least and most violations?
+
+3.	We hypothesize that location is highly associated with inspection grade and so we will be searching for patterns between these variables. 
+
+4.	We are also interested in seeing how inspection grade and score changes over time (month and years) based upon cuisine and location. 
+
+5.	A description of violations is also provided in the data and we would like to better understand the common causes of those violations based upon the description.
+
+6.	Is there a pattern/trend in violations/inspection score/grade based upon restaurant chains?
+
+We found this data set by exploring NYC open data sets. Our love for food and health made this a great option. One of our team members who recently moved to NYC is highly selective about food she eats due to her rare health condition and hence, having the kinds of questions mentioned above answered can prove to be a great asset to both her and others suffering from health conditions or who may just be picky eaters! The data can be found and downloaded here: https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/xx67-kt59
+
+
+To download, click the export button on the right -> Download as -> choose your format. For this assignement we are using CSV format.
+
+### *Question2. [10 points] Write a DRAFT description of the Team section.*
+
+Team and Task allocation:
+
+Team members:
+
+1.	Jonathan Galsurkar
+
+2.	Lakshya Garg
+
+#### Task Distribution 
+```{r }
+TaskDistribution <- read.csv(file="/Users/lakshyagarg/Documents/Columbia/Spring2017/ExplDataAndViz/Project/TaskDistribution.csv", 
+                           header=TRUE, sep=",",as.is=TRUE)
+library(knitr)
+kable(TaskDistribution )
+```
+
+Note that for this task we intend to use the columns available like Street name, ZIP Code, Borough to get latitude and logitude and plot the same on map. We will also be exploring tableau for this.
+
+### Question3-[30 points] Choose four variables that you consider to be important and begin analyzing them, following the advice in Chapter 8, sections 1 & 2, of Graphical Data Analysis with R, to begin by summarizing and plotting individual variables. Histograms and bar charts work well for this purpose, but you can use whatever techniques you find appropriate. 
+
+The most important variables that we are lookig at are: Borough, Year of inspection, Cuisine, Grade & Score.
+
+### LOAD DATA
+
+Here we load the data, convert columns into proper format for further analysis. The important columns like INSPECTION.DATE and GRADE.DATE are converted to date and other columns are converted to factors. Note that here we are presenting analysis of 4 -5 columns, however in future these will be augmented with others for further analysis. A list of columns is: (CAMIS, DBA, BORO,	BUILDING,	STREET,	ZIPCODE,	PHONE,	CUISINE DESCRIPTION,	INSPECTION DATE,	ACTION,	VIOLATION CODE,	VIOLATION DESCRIPTION,	CRITICAL FLAG,	SCORE,	GRADE,	GRADE DATE,	RECORD DATE,	INSPECTION TYPE).
+
+```{r}
+rm(list=ls())
+library(ggplot2)
+library(viridis)
+library("dplyr")
+
+ViolationsData <- read.csv(file="/Users/lakshyagarg/Documents/Columbia/Spring2017/ExplDataAndViz/Project/DOHMH_New_York_City_Restaurant_Inspection_Results.csv", 
+                           header=TRUE, sep=",",as.is=TRUE)
+##Date conversion
+ViolationsData<-ViolationsData %>%
+  mutate(INSPECTION.DATE= as.Date(INSPECTION.DATE, format= "%m/%d/%Y"))%>%
+  mutate(GRADE.DATE= as.Date(GRADE.DATE, format= "%m/%d/%Y"))%>%
+  mutate(RECORD.DATE= as.Date(RECORD.DATE, format= "%m/%d/%Y"))
+##Factor conversion
+ViolationsData<-ViolationsData %>%
+  mutate(CUISINE.DESCRIPTION= as.factor(CUISINE.DESCRIPTION))%>%
+  mutate(BORO= as.factor(BORO))%>%
+  mutate(VIOLATION.CODE= as.factor(VIOLATION.CODE))%>%
+  mutate(CRITICAL.FLAG= as.factor(CRITICAL.FLAG))%>%
+  mutate(GRADE= as.factor(GRADE))%>%
+  mutate(INSPECTION.TYPE= as.factor(INSPECTION.TYPE))
+```
+
+###Inspection per Year
+
+Below is a plot of violations per year. Note that limited results are available for 1900, 2011-12 and hence we will be removing these rows from further analysis. 2017 counts are low since the data is only available from Jan-March.
+```{r}
+##Violation Years
+violationYearsPlot <- ggplot(ViolationsData, aes(factor(as.numeric( format(INSPECTION.DATE , '%Y'))),fill="Red"))
+violationYearsPlot + geom_bar()+coord_flip()+ theme(legend.position="none") +xlab("Inspection Year")+ylab("Inspection Counts") + ggtitle("Inspection count from 2013-2017")
+```
+
+Note that we can see here that there is no inspection result data for 1900 and 2011-12. Thus for analysis going forward we will filter out the rows corrosponding to these inspection dates.
+
+### Inspection count from 2013-2017 in each Borough
+```{r,fig.width = 5, fig.height = 5}
+##BORO
+ViolationsData <- ViolationsData %>% filter (as.numeric( format(INSPECTION.DATE , '%Y'))>2012)##Filter out rows by year
+boroughPlot <- ggplot(ViolationsData, aes(BORO,fill=BORO))
+boroughPlot + geom_bar()+ theme(legend.position="none")+theme(axis.text.x = element_text(angle = 45, hjust = 1))+facet_wrap(~ factor(as.numeric( format(INSPECTION.DATE , '%Y'))))+ theme(legend.position="none") +xlab("Borough")+ylab("Inspection Counts") + ggtitle("Inspection count from 2013-2017 in each Borough")
+```
+
+After plotting this we realized data was not recorded for some boroughs hence appearing as missing. Looking at the data,there are 77 rows with missing borough. We will need to filter these out from our analysis going forward.
+
+### Inspection count from 2013-2017 in each criticality category
+```{r}
+##Criticality flag
+ViolationsData <- ViolationsData %>% filter (BORO != "Missing") ## Filter out data with missing Boro
+violationTypePlot <- ggplot(ViolationsData, aes(CRITICAL.FLAG,fill=CRITICAL.FLAG))
+violationTypePlot + geom_bar()+ theme(legend.position="none")+facet_wrap(~ factor(as.numeric( format(INSPECTION.DATE , '%Y'))))+theme(axis.text.x = element_text(angle = 45, hjust = 1))+ theme(legend.position="none") +xlab("Criticality Flag")+ylab("Inspection Counts") + ggtitle("Inspection count from 2013-2017 in each criticality category")
+```
+The plot above shows an upward trend in critical violations from 2013-2016. This is possible due to two reasons:
+
+1)Increase in number of restaurants.
+
+2)Some restaurants had multiple inspections, thus involving multiple counting.This is because certain violations warrant for cyclic inspection.
+
+2017 counts are low because the data is currently only available for Jan-March.
+
+### Violation distribution across each cuisine category
+```{r,fig.width = 5, fig.height = 10}
+##Cuisines
+library(plyr)
+ActionedViolationsData <- ViolationsData %>% filter (ACTION != "No violations were recorded at the time of this inspection.") ## Filter out data with "No violations were recorded at the time of this inspection."
+cusinecount<- count(ActionedViolationsData, 'CUISINE.DESCRIPTION')
+plot<-ggplot(data=cusinecount, aes(x=reorder(CUISINE.DESCRIPTION,freq), y=freq,fill=CUISINE.DESCRIPTION)) + geom_bar(stat="identity")+coord_flip()
+plot+ theme(legend.position="none")+geom_text(aes(label = sprintf("%.2f%%", freq/sum(freq) * 100)))+ theme(legend.position="none") +xlab("Violation %age")+ylab("Cuisines") + ggtitle("Violation distribution across each cuisine category")+theme(axis.text.y = element_text(angle = 45, hjust = 1))
+```
+Above is a plot of when some violations reported in a cuisine category. Note that:
+
+1)There are some overlapping categories that require further looking into such as chinese/japanese category and chinese/cuban category. For the purpose of further analysis we are going to move forward by rejecting rows with less than .1% .This is equivalent to kicking out cuisines with count < 376 at once.
+
+2)American cusines report maximum violations. This again could be because restaurants serving these cuisines had to undergo multiple cycles of violations. Additionally, being in NYC this is most definitely the popular cuisine served in the area.
+
+### Grouped barchart of grade frequency in each cuisine category when there was a violation reported.
+
+```{r,fig.width = 8, fig.height = 20}
+##GRADES
+cusinecountFiltered<-cusinecount %>% filter (freq > 376)
+cusines<-cusinecountFiltered[['CUISINE.DESCRIPTION']]
+ViolationsDataCuisines<-ViolationsData %>% filter (CUISINE.DESCRIPTION %in% cusines )
+cusinegradecount<- count(ViolationsDataCuisines, c('CUISINE.DESCRIPTION','GRADE'))
+ggplot(cusinegradecount, aes(CUISINE.DESCRIPTION, freq, fill = GRADE)) + 
+  geom_bar(stat="identity", position = "dodge") + 
+  scale_fill_brewer(palette = "Set1")+coord_flip()+ xlab("Cuisines")+ylab("Grade count") + ggtitle("Grouped barchart of grade frequency in each cuisine category when there was a violation reported")
+```
+
+Each violation earns a certain number of points. At the end of the inspection, the inspector totals the points and this number is the restaurant’s inspection score; the lower the score, the better. From the dataset there are 7 possible grades available which imply the following:
+
+1)A:Restaurants with a score between 0 and 13 points earn an A
+
+2)B:Restaurants with a score between 14 to 27 points receive a B 
+
+3)C:Restaurants with score 28 or more earn a C
+
+4)Z(Ungraded):A restaurant has two chances to earn an A in every inspection cycle. If it doesn’t earn an A on the first inspection, it’s scored but ungraded.
+
+5)P(Grade Pending):After being ungraded,an inspector goes back to the restaurant unannounced, typically within a month, to inspect it again and the re-inspection is graded. If the grade is a B or C, the restaurant will receive a grade card and a grade pending card.
+
+6)Not Yet Graded: Until a restaurant has a graded inspection, it is listed as Not Yet Graded on the Health Department website.
+
+7)Blank Grade: The following are scored but not graded. For ex.Initial inspections that result in a score of 14 points or higher, monitoring inspections at a restaurant that has performed very poorly on its re-inspection. The Health Department may continue to inspect the restaurant roughly once a month until it scores below 28 or the Department closes it for serious and persistent violations, inspections at new restaurants not yet open to the public, an inspection at a restaurant seeking to reopen after the Department closed it, some inspections in response to complaints.
+
+Looking at the chart above,a larger portion of cuisines belong to category 7 which requires further analysis.
+
+### Grade and missing score combinations by violation report
+
+```{r,fig.width = 8}
+library(dplyr)
+library(tidyr)
+score_grade <- ViolationsData[ -c(1:9, 11:13, 16:18) ]
+score_grade[score_grade == ''] <- NA
+score_grade_combos <- score_grade  %>% mutate(missing_score = ifelse(is.na(SCORE), "yes", "no"))
+score_grade_missing <- count(score_grade_combos, c('GRADE', 'missing_score', 'ACTION'))
+score_grade_missing <- score_grade_missing %>% 
+  mutate(violation = ifelse(ACTION == 'No violations were recorded at the time of this inspection.', 
+                                          "No violation", 
+                            ifelse(is.na(score_grade_missing$ACTION), NA, "Violation Reported"))) %>%
+  select(-c(ACTION))
+
+ggplot(score_grade_missing, aes(x = GRADE, y = log(freq), fill = missing_score)) + 
+  geom_bar(stat = 'identity', position = 'dodge') + facet_wrap(~violation) + 
+  ggtitle("Grade and missing score combinations by violation report") +
+  labs(x = "Grade", y = "Log(Frequency)")
+```
+
+To study the relationships between grade, missing scores and actions taken, we transformed the actions taken into three categories:
+
+1:No violations were recorded at the time of this inspection. to No Violation
+
+2:Any action reported to Violation reported
+
+3:Missing actions to NA
+
+Then we missing scores to figure out if scores were provided or not.
+
+Interesting insights from plot above are:
+
+1)Grades of NA reported high frequency of score in both No violation and violation reported category.
+
+2)At first, it appears that high scores are related to low grades or needs grading but then we find restaurants with a grade of A that has the same score as a restaurant with a grade of C. 
+
+Another insight by just looking at the data is we surprisingly saw that restaurants with a critical flag still receive grades of A.This needs further analysis.
+
+
