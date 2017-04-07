@@ -1,0 +1,210 @@
+---
+title: "To Eat Or Not To Eat?"
+author: "Jonathan Galsurkar - jfg2150 | Lakshya Garg - lg2906"
+output: html_notebook
+---
+
+In one of the greatest cities in the world, NYC, we have an abundant amount of options to choose from when it comes to where we eat, whether we are looking for fine dining, fast food, or something in between. The cuisine choices seem just as endless. Is there a good way to help choose a restaurant to eat in or a general location? Although not an easy task, one thing we can all agree on is that nobody wants to eat in a restaurant ridden with health violations. In this project, we will explore and analyze NYC’s restaurant inspection results from 2013-2017 of the five boroughs.
+
+We found this data set by exploring NYC open data sets. Our love for food and health made this a great option. One of our team members who recently moved to NYC is highly selective about food she eats due to her rare health condition and hence, having the kinds of questions mentioned above answered can prove to be a great asset to both her and others suffering from health conditions or who may just be picky eaters! The data can be found and downloaded here: https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/xx67-kt59
+
+To download, click the export button on the right -> Download as -> choose your format. For this project, we are using CSV format.
+
+First, let's load our data.
+```{r}
+ViolationsData <- read.csv(file="/Users/jgalsurkar/Documents/Columbia/EDAV/ToEatOrNotToEat/inspection.csv", header=TRUE, sep=",",as.is=TRUE)
+```
+
+In order to more easily work with our data let's ensure that every date is in a date format rather than a string and every string is a factor variable.
+```{r message=FALSE}
+library(dplyr)
+library(tidyr)
+##Date conversion
+ViolationsData <- ViolationsData %>%
+  mutate(INSPECTION.DATE= as.Date(INSPECTION.DATE, format= "%m/%d/%Y"))%>%
+  mutate(GRADE.DATE= as.Date(GRADE.DATE, format= "%m/%d/%Y"))%>%
+  mutate(RECORD.DATE= as.Date(RECORD.DATE, format= "%m/%d/%Y"))
+##Factor conversion
+ViolationsData <- ViolationsData %>%
+  mutate(CUISINE.DESCRIPTION= as.factor(CUISINE.DESCRIPTION))%>%
+  mutate(BORO= as.factor(BORO))%>%
+  mutate(VIOLATION.CODE= as.factor(VIOLATION.CODE))%>%
+  mutate(CRITICAL.FLAG= as.factor(CRITICAL.FLAG))%>%
+  mutate(GRADE= as.factor(GRADE))%>%
+  mutate(INSPECTION.TYPE= as.factor(INSPECTION.TYPE))
+```
+
+Let's take a look at the total amount of inspections in our data set by borough.
+```{r}
+library(ggplot2)
+boroughPlot <- ggplot(ViolationsData, aes(BORO, fill=BORO))
+boroughPlot + geom_bar()+ theme(legend.position="none") +
+  ggtitle('Number of Inspections by Borough') + 
+  labs(x = "Number of Inspections", y ="Borough")
+```
+Since we're interested in comparing Boroughs, let's get rid of data in which the Borough is missing. Clearly, there is a very small amount of such data as can be inferred from the plot above.
+
+```{r}
+ViolationsData <- ViolationsData %>% filter (BORO != "Missing")
+```
+
+Let's see if there are any patterns in the number of inspections done each year. Keep in mind that this data was downloaded on March 27th 2017 and so we will clearly not have as much data for the year of 2017.
+```{r}
+violationYearsPlot <- ggplot(ViolationsData, aes(factor(as.numeric(format(INSPECTION.DATE , '%Y'))), fill="Red"))
+violationYearsPlot + geom_bar()+coord_flip()+ theme(legend.position="none") +xlab("Inspection Year")+ylab("Inspection Counts") + ggtitle("Number of Inspections by Year")
+```
+We see that theredata for the 1900s. We will exclude these data points moving forward.
+
+```{r}
+ViolationsData <- ViolationsData %>% filter(
+  as.numeric(format(INSPECTION.DATE , '%Y')) > 2012)
+```
+
+Let's put the two previous plots together
+```{r}
+boroughPlot <- ggplot(ViolationsData, aes(BORO,fill=BORO))
+boroughPlot + geom_bar() + theme(legend.position="none") + 
+  facet_wrap(~factor(as.numeric( format(INSPECTION.DATE , '%Y')))) + 
+  ggtitle("Total Inspections from 2013-2017 in each Borough") +
+  xlab("Borough") + ylab("Number of Inspections") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+inspection_grades <- ViolationsData %>% select(-CAMIS, -DBA, -BUILDING, -STREET, -ZIPCODE, -PHONE, -INSPECTION.DATE, -ACTION, -VIOLATION.CODE, -VIOLATION.DESCRIPTION, -CRITICAL.FLAG, -SCORE, -GRADE.DATE, -RECORD.DATE, -INSPECTION.TYPE)
+
+ggplot(ViolationsData, aes(BORO, fill = GRADE)) + geom_bar(position = 'dodge') 
+
+```
+
+```{r}
+ggplot(ViolationsData, aes(CUISINE.DESCRIPTION, fill = GRADE)) + geom_bar() + coord_flip()
+```
+
+```{r}
+average_scores <- ViolationsData %>% select(-CAMIS, -DBA, -BUILDING, -STREET, -ZIPCODE, 
+                                            -PHONE, -INSPECTION.DATE, -ACTION, 
+                                            -VIOLATION.CODE, -VIOLATION.DESCRIPTION, 
+                                            -CRITICAL.FLAG, -GRADE, -GRADE.DATE, 
+                                            -RECORD.DATE, -INSPECTION.TYPE)
+
+average_cuisine <- average_scores %>%  group_by(CUISINE.DESCRIPTION) %>% na.omit %>%
+  summarize(average_score = mean(SCORE))
+average_cuisine <- arrange(average_cuisine, -average_score)
+
+ggplot(average_cuisine, aes(reorder(x = CUISINE.DESCRIPTION, --average_score), average_score, fill = CUISINE.DESCRIPTION)) + geom_bar(stat='identity') + coord_flip() + theme(legend.position = 'none')
+```
+
+```{r}
+worst10 <- average_cuisine[1:10,]
+
+ggplot(worst10, aes(reorder(x = CUISINE.DESCRIPTION, --average_score), average_score, fill = CUISINE.DESCRIPTION)) + geom_bar(stat='identity') + coord_flip() + theme(legend.position = 'none')
+```
+
+```{r}
+n <- nrow(average_cuisine)
+best10 <- average_cuisine[(n- 10):n,]
+best10 <- best10[order(best10$average_score),]
+
+ggplot(best10, aes(reorder(x = CUISINE.DESCRIPTION, -average_score), average_score, fill = CUISINE.DESCRIPTION)) + geom_bar(stat='identity') + coord_flip() + theme(legend.position = 'none')
+```
+
+```{r}
+average_borough <- average_scores %>%  group_by(BORO) %>% na.omit %>%
+  summarize(average_score = mean(SCORE))
+
+ggplot(average_borough, aes(reorder(x = BORO, --average_score), average_score, fill = BORO)) + geom_bar(stat='identity') + theme(legend.position = 'none')
+```
+
+
+
+
+
+```{r}
+
+violations<- ViolationsData %>% select(-CAMIS, -DBA, -BUILDING, -STREET, -ZIPCODE, 
+                                            -PHONE, -INSPECTION.DATE, -ACTION, 
+                                            -VIOLATION.CODE, 
+                                            -CRITICAL.FLAG, -GRADE, -GRADE.DATE, 
+                                            -RECORD.DATE, -INSPECTION.TYPE)
+
+vs <- violations %>%  group_by(VIOLATION.DESCRIPTION) %>% na.omit %>%
+  summarize(count = n())
+vs <- arrange(vs, -count)
+
+topviolations <- vs[1:10,]
+
+library(stringr)
+topviolations$viol = str_wrap(topviolations$VIOLATION.DESCRIPTION, width = 15)
+
+ggplot(topviolations, aes(reorder(viol, -count), count)) + geom_bar(stat='identity') + theme(legend.position = 'none')
+```
+
+```{r}
+library(ggmap)
+library(zipcode)
+data(zipcode)
+zipsNYC<-zipcode %>% filter(state=='NY')
+joined<-merge(zipsNYC, ViolationsData, by.x='zip', by.y='ZIPCODE')#by = c('zip' = 'ZIPCODE'))
+
+joined1 <- joined %>% 
+  mutate(GRADENEW = ifelse(GRADE=="", "missing", GRADE))
+joined1<-joined1 %>% select(latitude, longitude,GRADENEW)
+sapply(joined1, function(x) sum(is.na(x)))
+theme_set(theme_bw(16))
+
+NYCMap <- qmap("NY", zoom = 10, color = "bw", legend = "topleft")
+
+NYCMap +
+  geom_point(aes(x = as.numeric(as.character(longitude)), y = as.numeric(as.character(latitude)), colour = GRADENEW),
+             data = joined1) +
+scale_x_continuous(limits = c(-74.244, -73.677), expand = c(0, 0)) +
+scale_y_continuous(limits = c(40.507, 40.9009), expand = c(0, 0)) + theme(legend.position="right", legend.title = element_text(size=10),
+                                      legend.text = element_text(size=8))
+```
+
+```{r}
+zipdata<- ViolationsData %>% select(-CAMIS, -DBA, -BUILDING, -STREET, 
+                                            -PHONE, -INSPECTION.DATE, -ACTION, 
+                                            -VIOLATION.CODE, 
+                                            -CRITICAL.FLAG, -SCORE, -GRADE.DATE, 
+                                            -RECORD.DATE, -INSPECTION.TYPE, -VIOLATION.DESCRIPTION, -CUISINE.DESCRIPTION, -BORO) %>% na.omit()
+
+zipdata <- zipdata %>% gather(key, value, -ZIPCODE) %>% group_by(ZIPCODE, key, value) %>%
+  tally %>% spread(value, n, fill = 0) %>% summarize(aprop = A/(A+B+C))
+
+ggplot(zipdata, aes(reorder(x = ZIPCODE, --aprop), aprop)) + geom_bar(stat='identity') + 
+  coord_flip() +
+  theme( 
+        axis.text = element_text(size = 3))
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+
