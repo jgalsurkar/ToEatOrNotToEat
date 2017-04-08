@@ -12,7 +12,7 @@ To download, click the export button on the right -> Download as -> choose your 
 
 First, let's load our data.
 ```{r}
-ViolationsData <- read.csv(file="/Users/jgalsurkar/Documents/Columbia/EDAV/ToEatOrNotToEat/inspection.csv", header=TRUE, sep=",",as.is=TRUE)
+ViolationsData <- read.csv(file="inspection.csv", header=TRUE, sep=",",as.is=TRUE)
 ```
 
 In order to more easily work with our data let's ensure that every date is in a date format rather than a string and every string is a factor variable.
@@ -69,11 +69,37 @@ boroughPlot + geom_bar() + theme(legend.position="none") +
   xlab("Borough") + ylab("Number of Inspections") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+```{r}
+inspection_grades <- ViolationsData %>% select(-CAMIS, -DBA, -BUILDING, -STREET, -ZIPCODE, -PHONE, -ACTION, -VIOLATION.CODE, -VIOLATION.DESCRIPTION, -CRITICAL.FLAG, -SCORE, -GRADE.DATE, -RECORD.DATE, -INSPECTION.TYPE,-CUISINE.DESCRIPTION)
+inspection_grades_woyear<-inspection_grades %>% select(-INSPECTION.DATE)
+inspection_grades_woyear <- inspection_grades_woyear %>% gather(key, value, -BORO) %>% group_by(BORO, key, value) %>% tally %>% spread(value, n, fill = 0)# %>% gather(blah, -BORO, -key) #summarize(aprop = A/(A+B+C+))
+names(inspection_grades_woyear)[names(inspection_grades_woyear)=="key"] <- "grade"
+names(inspection_grades_woyear)[names(inspection_grades_woyear)==""] <- "unknown"
+inspection_grades_woyear <- inspection_grades_woyear %>% gather(key, value, -BORO,-grade)
+RelFreq<-function(m){
+   ((m )/sum(m))
+ }
+inspection_grades_woyear<-inspection_grades_woyear %>% group_by(BORO,grade) %>%
+    mutate(percentage = (value/sum(value))*100)
+ggplot(inspection_grades_woyear, aes(BORO, percentage ,fill= key)) + geom_bar(stat="identity", position = "dodge") 
+
+```
 
 ```{r}
-inspection_grades <- ViolationsData %>% select(-CAMIS, -DBA, -BUILDING, -STREET, -ZIPCODE, -PHONE, -INSPECTION.DATE, -ACTION, -VIOLATION.CODE, -VIOLATION.DESCRIPTION, -CRITICAL.FLAG, -SCORE, -GRADE.DATE, -RECORD.DATE, -INSPECTION.TYPE)
 
-ggplot(ViolationsData, aes(BORO, fill = GRADE)) + geom_bar(position = 'dodge') 
+inspection_grades_year<-inspection_grades%>% mutate(year=factor(as.numeric(format(INSPECTION.DATE , '%Y'))))
+inspection_grades_year<-inspection_grades_year%>% select(-INSPECTION.DATE)
+ inspection_grades_year <- inspection_grades_year %>% gather(key, value, -BORO,-year) %>% group_by(BORO,year, key, value) %>% 
+   tally %>% spread(value, n, fill = 0)# %>% gather(blah, -BORO, -key) #summarize(aprop = A/(A+B+C+))
+names(inspection_grades_year)[names(inspection_grades_year)=="key"] <- "grade"
+names(inspection_grades_year)[names(inspection_grades_year)==""] <- "unknown"
+inspection_grades_year <- inspection_grades_year %>% gather(key, value, -BORO,-grade,-year)
+RelFreq<-function(m){
+   ((m )/sum(m))
+ }
+inspection_grades_year<-inspection_grades_year %>% group_by(BORO,grade,year) %>%
+    mutate(percentage = (value/sum(value))*100)
+ggplot(inspection_grades_year, aes(BORO, percentage ,fill= key)) + geom_bar(stat="identity", position = "dodge") +facet_grid(~year)
 
 ```
 
