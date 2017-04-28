@@ -179,11 +179,11 @@ knitr::include_graphics('Aprop2013.png')
 knitr::include_graphics('Aprop2016.png')
 ```
 
-The darker the shade of red, the higher proportion of A grades. It is clear that over the last 3 years, the proportion of restuarants with a grade of an A has inscreased. NYC inspections must be working to improve the quality of the restuarants we eat in! In 2013, it seems that the there were only a few neighborhoods with an extremely high proportion of A grades. Only 3 areas in Staten Island, 1 in Long Island, a few in Brooklyn, Manhattan, and the Bronx. In 2016 on the other hand, the proportion of A grades is very high almost regardless of neighborhood. Keep it up NYC restaruant inspections!
+The darker the shade of red, the higher proportion of A grades. It is clear that over the last 3 years, the proportion of restuarants with a grade of an A has inscreased. NYC inspections must be working to improve the quality of the restuarants we eat in! In 2013, it seems that the there were only a few neighborhoods with an extremely high proportion of A grades. Only 3 areas in Staten Island, 1 in Long Island, a few in Brooklyn, Manhattan, and the Bronx. In 2016 on the other hand, the proportion of A grades is very high almost regardless of neighborhood. Keep it up NYC restuarant inspections!
 
-To see this from another angle, let's look at the average scores per neighborhood in 2013 and 2016. Average scores were binned in teh legend such that:
+To see this from another angle, let's look at the average scores per neighborhood in 2013 and 2016. Average scores were binned in the legend such that:
 
-+ 1 menas the average score was less than 10,
++ 1 means that the average score was less than 10,
 
 + 2 if the average score was between 10 and 20, 
 
@@ -201,7 +201,7 @@ knitr::include_graphics('AvgScore2013.png')
 knitr::include_graphics('AvgScore2016.png')
 ```
 
-Just look how much lighter the color of each neighborhood got! Lighter colors mean a lower average score, which correlates to less violations and a healthier establishment!
+Just look how much lighter the color of each neighborhood got! Lighter colors mean a lower average score, which correlates to less violations and healthier establishments!
 
 Well now we know what neighborhoods to be in for establishments with low scores and A grades, but what are the average scores based upon cuisine?
 
@@ -224,14 +224,14 @@ n <- nrow(average_cuisine)
 best10 <- average_cuisine[(n- 10):n,]
 best10 <- best10[order(best10$average_score),]
 
-ggplot(best10, aes(reorder(x = CUISINE.DESCRIPTION, -average_score), average_score, fill = CUISINE.DESCRIPTION)) + geom_bar(stat='identity') + coord_flip() + theme(legend.position = 'none')+ggtitle("Average score of top 10 cuisines")+xlab("Cuisine description")+ylab("average score")+geom_text(aes(label = sprintf("%.2f", average_score)),position = position_dodge(width = 1),#position=position_stack(vjust=0.5)
+ggplot(best10, aes(reorder(x = CUISINE.DESCRIPTION, -average_score), average_score, fill = CUISINE.DESCRIPTION)) + geom_bar(stat='identity') + coord_flip() + theme(legend.position = 'none')+ggtitle("Average Score of top 10 cuisines")+xlab("Cuisine Description")+ylab("Average Score")+geom_text(aes(label = sprintf("%.2f", average_score)),position = position_dodge(width = 1),#position=position_stack(vjust=0.5)
                                                                                                                      vjust = 0.5, size = 4)
 ```
 
 ```{r echo = FALSE}
 worst10 <- average_cuisine[1:10,]
 
-ggplot(worst10, aes(reorder(x = CUISINE.DESCRIPTION, --average_score), average_score, fill = CUISINE.DESCRIPTION)) + geom_bar(stat='identity') + coord_flip() + theme(legend.position = 'none')+ggtitle("Average score of Worst 10 cuisines")+xlab("Cuisine description")+ylab("average score")+geom_text(aes(label = sprintf("%.2f", average_score)),position = position_dodge(width = 1))
+ggplot(worst10, aes(reorder(x = CUISINE.DESCRIPTION, --average_score), average_score, fill = CUISINE.DESCRIPTION)) + geom_bar(stat='identity') + coord_flip() + theme(legend.position = 'none')+ggtitle("Average Score of Worst 10 cuisines")+xlab("Cuisine Description")+ylab("Average Score")+geom_text(aes(label = sprintf("%.2f", average_score)),position = position_dodge(width = 1))
 ```
 
 It is interesting that Not Listed/Not Applicable and Other made it to the top 10 but there you have it, the best and worst cuisines based upon their average scores.
@@ -254,7 +254,7 @@ boroughPlot + geom_bar() + theme(legend.position="none") +
   xlab("Borough") + ylab("Number of Inspections") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
-After 2013, there seems to be a consistent amount of inspections acros the years. The number of inspections by borough also seems to make sense since we expect Manhattan to have the largest number of restuarants.
+After 2013, there seems to be a consistent amount of inspections across the years. The number of inspections by borough also seems to make sense since we expect Manhattan to have the largest number of restuarants.
 
 Next, we took a look at the grade distribution by borough.
 ```{r,fig.width=8,fig.height=3}
@@ -274,8 +274,8 @@ inspection_grades_woyear<-inspection_grades_woyear %>% group_by(BORO,grade) %>%
     mutate(percentage = (value/sum(value))*100)
 ggplot(inspection_grades_woyear, aes(BORO, percentage ,fill= key)) + 
   geom_bar(stat="identity", position = "dodge") +
-  ggtitle('%Grade distribution across boroughs') + 
-  labs(x = "Borough", y ="Percentage") + guides(fill=guide_legend(title="Grade"))
+  ggtitle('%Grade Distribution across boroughs') + 
+  labs(x = "Borough", y ="Percentage") + guides(fill=guide_legend(title="Grade"))  + theme(plot.title = element_text(size = 25, face = "bold"))
 
 ```
 We initially hypothesized that we would see a pattern in grade distribution by borough, however, the plot shows us that grade distributions are almost the same regardless of borough.
@@ -297,11 +297,11 @@ inspection_grades_year<-inspection_grades_year %>% group_by(BORO,grade,year) %>%
 ggplot(inspection_grades_year, aes(BORO, percentage ,fill= key)) + 
   geom_bar(stat="identity", position = "dodge") +facet_wrap(~year,nrow=2,ncol=3)+
   guides(fill=guide_legend(title="Grade"))+
-  ggtitle("%Grade distribution by BOROUGH")
+  ggtitle("%Grade Distribution by Borough and Year")+ theme(plot.title = element_text(size = 25, face = "bold"))
 
 ```
 
-Adding year to this analysis showed us an increase in the proportian of As in Sataten Island in 2015 but seemed consistent throughout the rest of the plot.
+Adding year to this analysis showed us an increase in the proportian of As in Staten Island in 2015 but seemed consistent throughout the rest of the plot.
 
 
 We decided that borough may be too general and thus looked at grade distribution by zip code across the various years. We used a heat map to do so.
@@ -321,7 +321,7 @@ ggplot(nonYearDataForHeatMap, aes(GRADE,
                         ZIPCODE, fill = percentage)) +
   geom_tile() +
   scale_fill_viridis() +
-  ggtitle("Percentage grade distribution by zipcode\n ")+ylab("Zip Code") + theme(plot.title = element_text(size = 35, face = "bold"), 
+  ggtitle("Percentage Grade Distribution by Zipcode\n ")+ylab("Zip Code") + theme(plot.title = element_text(size = 35), 
         axis.text.x = element_text(colour="grey20",size=15,angle=0,hjust=.5, 
                                    vjust=.5,face="plain"), 
         axis.text.y = element_text(colour="grey20",size=10,angle=0,hjust=1,
@@ -333,7 +333,7 @@ ggplot(nonYearDataForHeatMap, aes(GRADE,
         legend.title = element_text(size=20),
         legend.text=element_text(size=20), legend.key.size = unit(1, 'in'))
 ```
-It is interesting to note that missing grades are probably the most probable in general. There are some zip codes with almost no missing grades. The restuarants in those same zip codes seem to mostly have all A grades. Another interesting point is 1 zip code which has all Not Yet Graded grades. In geneeral missing gradees and grades of an A seem the most common. This is followed by grades of a B.
+It is interesting to note that missing grades are probably the most probable in general. There are some zip codes with almost no missing grades. The restuarants in those same zip codes seem to mostly have all A grades. Another interesting point is 1 zip code which has all Not Yet Graded grades. In general missing grades and grades of an A seem the most common. This is followed by grades of a B.
 
 The next part of our analysis was to look at the average scores of each cuisine. With this information, we can help consumers see what kinds of establishments have the best and worst scores on average. This in term can help a consumer choose a type of cuisine when they are hungry.
 
@@ -348,7 +348,7 @@ average_cuisine <- average_scores %>%  group_by(CUISINE.DESCRIPTION) %>% na.omit
   dplyr::summarize(average_score = mean(SCORE))
 average_cuisine <- arrange(average_cuisine, -average_score)
 
-ggplot(average_cuisine, aes(reorder(x = CUISINE.DESCRIPTION, --average_score), average_score,fill="Blue")) + geom_bar(stat='identity') + coord_flip() + theme(legend.position = 'none')+ggtitle("Average Scores Across Cuisines")+xlab("Cuisine Description")+ylab("Average Score")+geom_text(aes(label = sprintf("%.2f", average_score)),position=position_stack(vjust=0.5),vjust = 0.5, size = 3) + theme(plot.title = element_text(size = 25, face = "bold"), 
+ggplot(average_cuisine, aes(reorder(x = CUISINE.DESCRIPTION, --average_score), average_score,fill="Blue")) + geom_bar(stat='identity') + coord_flip() + theme(legend.position = 'none')+ggtitle("Average Scores Across Cuisines")+xlab("Cuisine Description")+ylab("Average Score")+geom_text(aes(label = sprintf("%.2f", average_score)),position=position_stack(vjust=0.5),vjust = 0.5, size = 3) + theme(plot.title = element_text(size = 25), 
         axis.title.x = element_text(colour="grey20",size=20,angle=0,hjust=.5,
                                     vjust=0,face="plain"),
         axis.title.y = element_text(colour="grey20",size=20,angle=90,hjust=.5,
@@ -358,7 +358,7 @@ ggplot(average_cuisine, aes(reorder(x = CUISINE.DESCRIPTION, --average_score), a
 ```{r}
 worst10 <- average_cuisine[1:10,]
 
-ggplot(worst10, aes(reorder(x = CUISINE.DESCRIPTION, --average_score), average_score, fill = CUISINE.DESCRIPTION)) + geom_bar(stat='identity') + coord_flip() + theme(legend.position = 'none')+ggtitle("Average score of Worst 10 cuisines")+xlab("Cuisine description")+ylab("average score")+geom_text(aes(label = sprintf("%.2f", average_score)),position=position_stack(vjust=0.5))
+ggplot(worst10, aes(reorder(x = CUISINE.DESCRIPTION, --average_score), average_score, fill = CUISINE.DESCRIPTION)) + geom_bar(stat='identity') + coord_flip() + theme(legend.position = 'none')+ggtitle("Average Score of Worst 10 cuisines")+xlab("Cuisine Description")+ylab("Average Score")+geom_text(aes(label = sprintf("%.2f", average_score)),position=position_stack(vjust=0.5))
 ```
 
 ```{r}
@@ -366,22 +366,22 @@ n <- nrow(average_cuisine)
 best10 <- average_cuisine[(n- 10):n,]
 best10 <- best10[order(best10$average_score),]
 
-ggplot(best10, aes(reorder(x = CUISINE.DESCRIPTION, -average_score), average_score, fill = CUISINE.DESCRIPTION)) + geom_bar(stat='identity') + coord_flip() + theme(legend.position = 'none')+ggtitle("Average score of top 10 cuisines")+xlab("Cuisine description")+ylab("average score")+geom_text(aes(label = sprintf("%.2f", average_score)),position = position_dodge(width = 1),#position=position_stack(vjust=0.5)
+ggplot(best10, aes(reorder(x = CUISINE.DESCRIPTION, -average_score), average_score, fill = CUISINE.DESCRIPTION)) + geom_bar(stat='identity') + coord_flip() + theme(legend.position = 'none')+ggtitle("Average Score of top 10 cuisines")+xlab("Cuisine Description")+ylab("Average Score")+geom_text(aes(label = sprintf("%.2f", average_score)),position = position_dodge(width = 1),#position=position_stack(vjust=0.5)
                                                                                                                      vjust = 0.5, size = 4)
 ```
 
 It is interesting that the mysterious "not applicable"" cuisine is one of the best!
 
-In this next plot, we wanted to see if the average score significantly differed by Borough
+In this next plot, we wanted to see if the average score significantly differed by Borough.
 ```{r}
 average_borough <- average_scores %>%  group_by(BORO) %>% na.omit %>%
   dplyr::summarize(average_score = mean(SCORE))
 
-ggplot(average_borough, aes(reorder(x = BORO, --average_score), average_score, fill = BORO)) + geom_bar(stat='identity') + theme(legend.position = 'none')+ggtitle("Average score across boroughs")+xlab("Borough")+ylab("average score")+geom_text(aes(label = sprintf("%.2f", average_score)),position = position_dodge(width = 1),
+ggplot(average_borough, aes(reorder(x = BORO, --average_score), average_score, fill = BORO)) + geom_bar(stat='identity') + theme(legend.position = 'none')+ggtitle("Average Score across boroughs")+xlab("Borough")+ylab("Average Score")+geom_text(aes(label = sprintf("%.2f", average_score)),position = position_dodge(width = 1),
                                                                                                                      vjust = -0.5, size = 3)
 ```
 
-Although we see slight difference, the boroughs have approximately the same average score. Staten Island may be the one exception. We also faceted by year to see if that made a difference, but the results were essentially the same as in the plot above.
+Although we see a slight difference, the boroughs have approximately the same average score. Staten Island may be the one exception. We also faceted by year to see if that made a difference, but the results were essentially the same as in the plot above.
 
 So far we looked at grades and scores but not the actual violations. Whare are the top violations restaurants usually face?
 ```{r,fig.width=12}
@@ -440,7 +440,7 @@ ggplot(average_mos, aes(BORO,
  geom_tile() +
  scale_fill_viridis() +
  #facet_wrap(~BORO)
- ggtitle("AVERAGE VIOLATION SCORE BY ZIP CODE\n ")+
+ ggtitle("Average Violation Score by Zip Code\n ")+ xlab('Borough') +
  theme(plot.title = element_text(size = 30, face = "bold"), 
         axis.text.x = element_text(colour="grey20",size=20,angle=0,hjust=.5, 
                                    vjust=.5,face="plain"), 
@@ -480,7 +480,7 @@ ggplot(CriticalityDataPercentage, aes(BORO, value, fill = key1)) +
   scale_fill_brewer(palette = "Set1")+ xlab("BOROUGH")+ylab("CRITICALITY PERCENTAGES") +theme(axis.text.x = element_text(angle = 45, hjust = 1))+ ggtitle("Grouped barchart of grade frequency in each cuisine category \n when there was a violation reported")+facet_wrap(~year,nrow=2,ncol=3)+guides(fill=guide_legend(title="Criticality \n category"))
 
 ```
-We attempted to further analyze the critical flag but we learned that the critical flag did not have too much impact on grade or scores. There was a lot of data with a grade of A but a Critical flag while others with a very high score by no critical flag.
+We attempted to further analyze the critical flag but we learned that the critical flag did not have too much of an impact on grade or scores. There was a lot of data with a grade of A but a Critical flag while others with a very high score by no critical flag.
 
 ## VISUALISING DATA WITH MAPS
 
@@ -488,7 +488,7 @@ For the remainder of the analysis, we will be working with Tableau. We chose Tab
 
 + Please note that there is a tutorial for deriving maps from generated datset in Tableau in the github repository as ChoroplethMaps.html under the "FinalReport" folder in the Github Repository. It was created by our very own Lakshya Garg.
 
-The code chunks will generate the data that we upload to Tableau. In the following analysis, we explore the proportion of A grades based on neighborhood over the years.
+The code chunks will generate the data that we upload to Tableau. In the following analysis, we explore the proportion of A grades based on neighborhoods over the years.
 ```{r,fig.height=15}
 #####GENERATE GRADE PROPOERTION DATASET BY YEAR FOR TABLEAU PLOTTING
 zipdata<- ViolationsData %>% select(-CAMIS, -DBA, -BUILDING, -STREET, 
@@ -505,9 +505,9 @@ zipdataGradePercentage <- zipdata %>%select(-INSPECTION.DATE) %>%gather(key, val
 #   theme( axis.text = element_text(size = 3))
 ```
 
-### PROPORTIONS OF GRADE A ACROSS YEARS
+### PROPORTIONS OF A GRADES ACROSS THE YEARS
 
-Over the years, the proportion of A's has increased, as represented by the darker red shading of the map. It is too early to study 2017 in depth due to the limited number of inspections so far. Note that 2017 data maps are only for quater1 and are likely to change.
+Over the years, the proportion of A's has increased, as represented by the darker red shading of the map. It is too early to study 2017 in depth due to the limited number of inspections so far. Note that 2017 data maps are only for the first quarter and are likely to change.
 
 ```{r}
 knitr::include_graphics('Aprop2013.png')
@@ -529,9 +529,9 @@ knitr::include_graphics('Aprop2016.png')
 knitr::include_graphics('Aprop2017.png')
 ```
 
-### PROPORTIONS OF GRADE B ACROSS YEARS
+### PROPORTIONS OF B GRADES ACROSS THE YEARS
 
-Let's look at how the proportion of B's change.We can see that over the years, there seem to be less B's which makes sense since over the years we have more grades of A. Note that 2017 data maps are only for quater1 and are likely to change.
+Let's look at how the proportion of B's change. We can see that over the years, there seem to be less B's which makes sense since over the years we have more grades of an A. Note that 2017 data maps are only for the first quarter and are likely to change.
 
 ```{r}
 knitr::include_graphics('Bprop1.png')
@@ -554,12 +554,12 @@ knitr::include_graphics('Bprop5.png')
 ```
 
 
-### AVERAGE SCORES BY ZIPCODE OVER YEARS
+### AVERAGE SCORES BY ZIPCODE OVER THE YEARS
 
 Let's look at the average scores by neighborhood. We have already done so by cuisine.
 Over the years, we have a lower Average Score. These NYC inspections must be prompting resturants to improve their facilities and follow regulations!
 
-Note that 2017 data maps are only for quater1 and are likely to change.
+Note that 2017 data maps are only for the first quarter and are likely to change.
 
 
 ```{r}
@@ -582,11 +582,11 @@ knitr::include_graphics('AvgScore2016.png')
 knitr::include_graphics('AvgScore2017.png')
 ```
 
-### AVERAGE RE-INSPECTIONS OVER YEARS
+### AVERAGE RE-INSPECTIONS OVER THE YEARS
 
-We decided to see which areas had the highest average number of reinspections. Maybe this can explain the better scores and grades over time.Interestingly enough, the areas with the most reinspections seem to be the ones in which the grades and scores improved. The system of reinspections must be working!
+We decided to see which areas had the highest average number of reinspections. Maybe this can explain the better scores and grades over time. Interestingly enough, the areas with the most reinspections seem to be the ones in which the grades and scores improved. The system of reinspections must be working!
 
-Note that 2017 data maps are only for quater1 and are likely to change.
+Note that 2017 data maps are only for the first quarter and are likely to change.
 
 
 ```{r}
@@ -623,9 +623,12 @@ knitr::include_graphics('AvgReinspect2016.png')
 knitr::include_graphics('AvgReinspect2017.png')
 ```
 
-## STARBUKS OR DUNKIN DONUTS???
+## STARBUCKS OR DUNKIN DONUTS???
+```{r, echo = FALSE}
+knitr::include_graphics('svsd.jpg')
+```
 
-As a last bit of analysis, we decided to help settle a huge dilemna : Where should you get your coffee, Starbucks or Dunking Donuts?
+As a last bit of analysis, we decided to help settle a huge dilemna : Where should you get your coffee, Starbucks or Dunkin Donuts?
 
 ```{r}
 ##DATA GENERATION CODE
@@ -639,7 +642,7 @@ ChainssDf$year<-factor(as.numeric( format(ChainssDf$INSPECTION.DATE , '%Y')))
 ChainssDf<-ChainssDf%>%select(-INSPECTION.DATE)
 ```
 
-As you can see, Dunking Donuts has more critical violations than Starbucks in every Borough. Noticible differences are especially see in Brooklyn and Manhattan.
+As you can see, Dunkin Donuts has more critical violations than Starbucks in every Borough. Noticible differences are especially see in Brooklyn and Manhattan.
 
 ```{r}
 knitr::include_graphics('DS1.png')
@@ -657,17 +660,22 @@ What about the average score?
 knitr::include_graphics('DS3.png')
 ```
 
-Regardles of the year, the average score of Dunking Donuts has been higher. The higher the score, the worse. Noticible differences are seen in 2015 and the first three months of 2017.
+Regardles of the year, the average score of Dunkin Donuts has been higher. The higher the score, the worse. Noticiable differences are seen in 2015 and the first three months of 2017.
 
-Let's see if the Borough your in should impact your choice.
+Let's see if the Borough you're in should impact your choice.
 ```{r}
 knitr::include_graphics('DS4.png')
 ```
 
 ### We guess when you're in Brooklyn, it doesn't matter but everywhere else, stick to Starbucks, especially you Staten Island folks!
 
+
+```{r, echo = FALSE}
+knitr::include_graphics('winner.jpg')
+```
+
 ## Conclusion
-Many limitations included the missing data itself. We learned that sometimes, what may seem like an intuitive hypothesis, is actually completely false. There were not as many patterns as we anticipated in terms of Borough. The only thing we did see is that over time, the score and grade has increased, showing us that the inspections are working and that restuarants are improving their facilities to receieve a better score. According to the website we receved the data from, three fields are soon to be added as data logic becomes available to populate them accurately. Those fields are VIOLATION POINTS (the points assigned to a violation before or after adjudication, depending on whether adjudication has occurred), FINES TOTAL (the fine amount after adjudication), and DECISION DATE (adjudication date – or date a grade becomes final). With this information, we can do more analysis to see the fines of various violations and learn how each violation actually affects the score. With that, restaurants can focus on the main violations to improve their scores in the next inspection.
+Many limitations included the missing data itself. We learned that sometimes, what may seem like an intuitive hypothesis, is actually completely false. There were not as many patterns as we anticipated in terms of Borough. The only thing we did see is that over time, the score and grade has increased, showing us that the inspections seem to be working and that restuarants are improving their facilities to receieve a better score and grade. According to the website we received the data from, three fields are soon to be added as data logic becomes available to populate them accurately. Those fields are VIOLATION POINTS (the points assigned to a violation before or after adjudication, depending on whether adjudication has occurred), FINES TOTAL (the fine amount after adjudication), and DECISION DATE (adjudication date – or date a grade becomes final). With this information, we can do more analysis to see the fines of various violations and learn how each violation actually affects the score. With that, restaurants can focus on the main violations to improve their scores in the next inspection.
 
 
 
